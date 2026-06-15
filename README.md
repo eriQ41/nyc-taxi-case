@@ -22,7 +22,8 @@ The case asks to (1) ingest NYC taxi data for **Jan–May 2023** into a data lak
 .
 ├─ src/                         # Pipeline (PySpark)
 │  ├─ 00_config.py              # Catalog/schema/volume names, scope, cleaning thresholds
-│  ├─ 01_ingest_landing.py      # Download TLC parquet → UC Volume (landing)
+│  ├─ 01_ingest_landing.py      # Validate the landing Volume has all expected files
+│  ├─ download_landing_local.py # LOCAL: download TLC parquet + upload to the Volume
 │  ├─ 02_bronze.py              # Landing → bronze Delta (raw + ingest metadata)
 │  ├─ 03_silver.py              # Bronze → silver (typed, cleaned, unified)
 │  └─ 04_gold.py                # Silver → gold (consumption tables)
@@ -68,10 +69,9 @@ Data model: catalog `ifood`, schemas `bronze` / `silver` / `gold`, raw files in 
    - **Or in two steps:** `python src/download_landing_local.py` then upload the
      `data/landing/{yellow,green}/` files via Catalog Explorer → `ifood` → `bronze` →
      Volumes → `landing` → Upload.
-   > On a workspace *with* internet egress, you can skip this and let
-   > `01_ingest_landing` download directly.
-6. Run `src/01_ingest_landing` → **Run all**. It attempts a download and then
-   **validates the Volume contents** (the authoritative gate).
+6. Run `src/01_ingest_landing` → **Run all**. It **validates** that all expected files
+   are present in the Volume (the gate for the rest of the pipeline) — it does not
+   download anything (serverless has no internet; population is the step above).
 7. Run `src/02_bronze` → `03_silver` → `04_gold` in order.
 8. Run the `analysis/` SQL/notebooks against the gold tables.
 
