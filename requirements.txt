@@ -1,0 +1,5 @@
+# Local / reference dependencies.
+# On Databricks Free Edition, Spark is already provided by the runtime;
+# these pin versions for local development and for running the helper scripts.
+pyspark>=3.5.0
+requests>=2.31.0
