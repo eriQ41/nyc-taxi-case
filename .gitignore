@@ -1,0 +1,16 @@
+# Local copy of the landing data (downloaded locally, uploaded to the UC Volume).
+# Never commit the raw parquet — it's large and reproducible from the TLC source.
+/data/
+*.parquet
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

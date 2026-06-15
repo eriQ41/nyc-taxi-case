@@ -50,14 +50,30 @@ Data model: catalog `ifood`, schemas `bronze` / `silver` / `gold`, raw files in 
 ## How to run (Databricks Free Edition)
 
 1. Sign up / log in at the Databricks Free Edition workspace.
-2. Import this repo via **Repos → Add Repo** (Git URL) or upload the `src/` and
+2. Bring this repo in via **Workspace → Create → Git folder** (paste the Git URL;
+   needs a GitHub PAT under Settings → Git integration), or upload the `src/` and
    `analysis/` files as notebooks.
-3. Attach to **serverless** compute.
-4. Run the `src/` notebooks **in order**:
-   1. `00_config` — defines names and scope (imported by the others)
-   2. `01_ingest_landing` — downloads Jan–May 2023 yellow + green parquet to the Volume
-   3. `02_bronze` → `03_silver` → `04_gold`
-5. Run the `analysis/` SQL/notebooks against the gold tables.
+3. Open a notebook and attach **serverless** compute via **Connect → Serverless**
+   (top-right). Free Edition has no clusters to create — serverless is the only option.
+4. Run `src/00_config` → **Run all**. It bootstraps Unity Catalog: catalog `ifood`,
+   schemas `bronze/silver/gold`, and the `landing` Volume.
+5. **Populate the landing zone.** Free Edition serverless has **no outbound internet**,
+   so the files are downloaded on your machine and pushed to the Volume (raw data lives
+   in the lake, not in git — `data/` is git-ignored):
+   - **One command** (download + upload via the Databricks CLI; needs a one-time
+     `databricks configure` with host + PAT):
+     ```
+     python src/download_landing_local.py --upload
+     ```
+   - **Or in two steps:** `python src/download_landing_local.py` then upload the
+     `data/landing/{yellow,green}/` files via Catalog Explorer → `ifood` → `bronze` →
+     Volumes → `landing` → Upload.
+   > On a workspace *with* internet egress, you can skip this and let
+   > `01_ingest_landing` download directly.
+6. Run `src/01_ingest_landing` → **Run all**. It attempts a download and then
+   **validates the Volume contents** (the authoritative gate).
+7. Run `src/02_bronze` → `03_silver` → `04_gold` in order.
+8. Run the `analysis/` SQL/notebooks against the gold tables.
 
 > Optional: chain the `src/` notebooks as a **Lakeflow Job** (formerly Workflows) for
 > one-click, ordered execution.
