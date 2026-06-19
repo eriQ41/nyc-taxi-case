@@ -72,21 +72,21 @@ def build_silver(service: str) -> str:
         F.col("total_amount").cast("double").alias("total_amount"),
     )
 
-    cleaned = (
-        typed
-        .filter(
-            (F.col("pickup_datetime") >= F.lit(SCOPE_LO))
-            & (F.col("pickup_datetime") < F.lit(SCOPE_HI))
-        )
-        .dropDuplicates()
+    in_scope = typed.filter(
+        (F.col("pickup_datetime") >= F.lit(SCOPE_LO))
+        & (F.col("pickup_datetime") < F.lit(SCOPE_HI))
     )
+    in_scope_count = in_scope.count()
 
+    cleaned = in_scope.dropDuplicates()
     cleaned.write.format("delta").mode("overwrite") \
         .option("overwriteSchema", "true").saveAsTable(target)
 
     kept = spark.table(target).count()
-    print(f"{service}: {raw_count:,} bronze -> {kept:,} silver "
-          f"({raw_count - kept:,} dropped: out-of-scope + duplicates)")
+    out_of_scope = raw_count - in_scope_count        # pickup outside 2023-01..05 (or NULL)
+    duplicates = in_scope_count - kept               # exact dups on the kept columns
+    print(f"{service}: {raw_count:,} bronze -> {kept:,} silver | "
+          f"out-of-scope (timestamp): {out_of_scope:,} | duplicates: {duplicates:,}")
     return target
 
 # COMMAND ----------

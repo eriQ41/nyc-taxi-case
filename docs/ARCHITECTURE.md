@@ -82,7 +82,10 @@ These are the EDA-driven choices; each is defensible and documented:
   metering error and would bias a *per-passenger* mean). Kept elsewhere.
 - **`total_amount`:** drop negative values (refunds / chargebacks recorded as negative)
   for the revenue average, since they don't represent fare received.
-- **Dedupe:** drop exact duplicate rows defensively.
+- **Dedupe:** drop exact duplicate rows defensively. Dedup runs on the **columns kept
+  in silver** (service_type, vendorid, passenger_count, pickup/dropoff, total_amount),
+  so two rows identical across all of these collapse to one. `03_silver` reports the
+  out-of-scope vs duplicate counts separately.
 
 All thresholds are centralized so they're easy to audit and change.
 
