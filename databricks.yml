@@ -3,9 +3,12 @@
 # Deploy:  databricks bundle deploy -t dev
 # Run:     databricks bundle run nyc_taxi_pipeline -t dev
 #
-# Reproducibility: a consumer changes only the workspace `host` below and
-# authenticates the Databricks CLI with their own PAT. Everything else — the
-# catalog/schema/volume and the tables — is created by the notebooks themselves.
+# Reproducibility: there is NO hard-coded workspace here. The target deploys to
+# whatever workspace the Databricks CLI is authenticated against (its profile host).
+# So a consumer just authenticates their own CLI (`databricks auth login` or a PAT)
+# and runs `bundle deploy` — no edits needed. `mode: development` further isolates
+# the deployment per user (`[dev <user>]` prefix, per-user workspace path), so two
+# people can deploy from the same repo without colliding.
 #
 # Prerequisite: the landing Volume must already be populated (see README:
 # `python src/download_landing_local.py --upload`). The Job runs the processing
@@ -18,8 +21,8 @@ targets:
   dev:
     mode: development
     default: true
-    workspace:
-      host: https://dbc-45f08088-dda3.cloud.databricks.com
+    # No `workspace.host` on purpose — it comes from the authenticated CLI profile,
+    # so the bundle deploys to *your* workspace, whoever you are.
 
 resources:
   jobs:

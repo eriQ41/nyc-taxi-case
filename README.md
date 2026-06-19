@@ -89,8 +89,10 @@ databricks bundle deploy   -t dev          # create/update the Job in the worksp
 databricks bundle run nyc_taxi_pipeline -t dev   # run it end to end
 ```
 
-A consumer replicating the project changes only the `host` in `databricks.yml` and uses
-their own PAT — the catalog, schemas, volume and tables are all created by the notebooks.
+The bundle has **no hard-coded workspace** — it deploys to whatever workspace the CLI is
+authenticated against. So a consumer just authenticates their own CLI (no file edits),
+and `mode: development` isolates the deployment per user (`[dev <user>]` job name,
+per-user path). The catalog, schemas, volume and tables are all created by the notebooks.
 
 ## Results
 
