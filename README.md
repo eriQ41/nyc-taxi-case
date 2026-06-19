@@ -80,10 +80,38 @@ Data model: catalog `ifood`, schemas `bronze` / `silver` / `gold`, raw files in 
 
 ## Results
 
-> Filled in after running the pipeline.
+Produced by the queries in [`analysis/`](analysis) over the gold tables.
 
-- **Q1 — Average monthly `total_amount` (yellow):** _TBD_
-- **Q2 — Average `passenger_count` by hour (May, yellow + green):** _TBD_
+### Q1 — Average monthly `total_amount` (yellow taxis, `total_amount >= 0`)
+
+| Month   | Avg total_amount (USD) | Trips      |
+|---------|-----------------------:|-----------:|
+| 2023-01 |                  27.44 | 3,041,486 |
+| 2023-02 |                  27.34 | 2,889,071 |
+| 2023-03 |                  28.27 | 3,373,870 |
+| 2023-04 |                  28.76 | 3,258,463 |
+| 2023-05 |                  29.46 | 3,481,848 |
+
+The average fare per trip rose steadily from **~$27.4 (Jan)** to **~$29.5 (May)**, about
+**+7%** over five months.
+
+### Q2 — Average `passenger_count` by hour of day (May 2023, all taxis = yellow + green, `passenger_count >= 1`)
+
+Passengers-per-trip is **highest late night / early morning** (00–04h ≈ 1.40–1.45,
+group & social trips) and **lowest during the morning commute** (05–08h ≈ 1.26–1.29,
+solo commuters), then climbs back through the afternoon and evening. Full 24-hour curve:
+
+| Hour | Avg | Hour | Avg | Hour | Avg | Hour | Avg |
+|-----:|----:|-----:|----:|-----:|----:|-----:|----:|
+| 00 | 1.426 | 06 | 1.261 | 12 | 1.374 | 18 | 1.381 |
+| 01 | 1.435 | 07 | 1.281 | 13 | 1.383 | 19 | 1.390 |
+| 02 | 1.453 | 08 | 1.293 | 14 | 1.388 | 20 | 1.399 |
+| 03 | 1.448 | 09 | 1.311 | 15 | 1.399 | 21 | 1.418 |
+| 04 | 1.403 | 10 | 1.346 | 16 | 1.396 | 22 | 1.426 |
+| 05 | 1.284 | 11 | 1.361 | 17 | 1.387 | 23 | 1.421 |
+
+> Green is ~2% of the fleet (339,620 vs 16,186,145 yellow trips), so the curve is
+> dominated by yellow; see `analysis/exploratory_analysis.py` for the split.
 
 ## Tech & choices (short version)
 
