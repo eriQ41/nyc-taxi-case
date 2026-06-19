@@ -33,6 +33,7 @@ The case asks to (1) ingest NYC taxi data for **Jan–May 2023** into a data lak
 │  └─ exploratory_analysis.py   # EDA notebook
 ├─ docs/
 │  └─ ARCHITECTURE.md           # Decisions, data model, assumptions
+├─ databricks.yml               # Asset Bundle: the pipeline Job as code (Lakeflow)
 ├─ README.md
 └─ requirements.txt
 ```
@@ -75,8 +76,21 @@ Data model: catalog `ifood`, schemas `bronze` / `silver` / `gold`, raw files in 
 7. Run `src/02_bronze` → `03_silver` → `04_gold` in order.
 8. Run the `analysis/` SQL/notebooks against the gold tables.
 
-> Optional: chain the `src/` notebooks as a **Lakeflow Job** (formerly Workflows) for
-> one-click, ordered execution.
+### Orchestration — Lakeflow Job as code (optional)
+
+The pipeline is also defined as a **Databricks Asset Bundle** ([`databricks.yml`](databricks.yml)),
+so the **Lakeflow Job** (formerly Workflows) that chains `00→01→02→03→04` on serverless
+is **versioned in git** instead of click-built in the UI. With the Databricks CLI
+authenticated (`databricks auth login` / a PAT) and the landing Volume populated:
+
+```bash
+databricks bundle validate -t dev          # check config
+databricks bundle deploy   -t dev          # create/update the Job in the workspace
+databricks bundle run nyc_taxi_pipeline -t dev   # run it end to end
+```
+
+A consumer replicating the project changes only the `host` in `databricks.yml` and uses
+their own PAT — the catalog, schemas, volume and tables are all created by the notebooks.
 
 ## Results
 
