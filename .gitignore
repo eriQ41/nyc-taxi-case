@@ -7,6 +7,9 @@
 # the deployer's workspace path/email). The CLI also auto-ignores this folder.
 .databricks/
 
+# Case prompt (iFood's material) — kept locally, not published in the repo
+Case_iFood_-_Data_Architecture.pdf
+
 # Python
 __pycache__/
 *.pyc
