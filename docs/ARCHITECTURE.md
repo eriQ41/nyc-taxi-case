@@ -52,7 +52,14 @@ Scope: **Jan–May 2023** (`MM` = 01..05), for both **yellow** and **green** tax
 ```
 
 - **Landing:** original files, untouched, in a Volume. Idempotent re-download.
-- **Bronze:** 1:1 with source, plus `_source_file` and `_ingested_at`. No business logic.
+- **Bronze:** essentially 1:1 with source, plus `_source_file` and `_ingested_at`. The
+  only structural change is **conforming schema drift** across the monthly files: the
+  TLC files give the same column different types (e.g. `VendorID` INT vs BIGINT,
+  `passenger_count` BIGINT vs DOUBLE) and inconsistent casing (`Airport_fee` vs
+  `airport_fee`), which breaks Parquet `mergeSchema`. Bronze reads each month
+  individually, lower-cases column names, and **promotes numeric types to the widest**
+  seen (values widened, never lost) so all months load into one Delta table. The
+  case-mandated `VendorID` casing is restored in gold.
 - **Silver:** correct types, validation/cleaning (below), a `service_type` column,
   and a normalized `pickup_datetime` / `dropoff_datetime` (green's `lpep_*` and yellow's
   `tpep_*` mapped to common names) so the two can be unioned.
