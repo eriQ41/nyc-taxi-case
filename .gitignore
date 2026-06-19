@@ -3,6 +3,10 @@
 /data/
 *.parquet
 
+# Databricks Asset Bundle local state (per-user, regenerated on deploy; contains
+# the deployer's workspace path/email). The CLI also auto-ignores this folder.
+.databricks/
+
 # Python
 __pycache__/
 *.pyc
